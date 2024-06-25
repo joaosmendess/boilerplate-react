@@ -1,0 +1,142 @@
+#!/bin/bash
+
+# Captura o nome do projeto a partir dos argumentos do script
+nome_do_projeto=$1
+
+# Verifica se o caminho do projeto foi fornecido
+if [ -z "$nome_do_projeto" ]; then
+  echo "Uso: $0 <nome-do-projeto>"
+  exit 1
+fi
+
+# Define o caminho completo para a pasta "Documentos/projetos"
+pasta_projetos="$HOME/Documentos/projetos"
+
+# Cria a pasta se ela não existir
+mkdir -p "$pasta_projetos"
+
+# Caminho completo para o novo projeto
+caminho_projeto="$pasta_projetos/$nome_do_projeto"
+
+# Criação automática do projeto com Vite, React e TypeScript
+npm create vite@latest "$nome_do_projeto" -- --template react-ts
+
+# Verifica se a criação do projeto foi bem-sucedida
+if [ $? -ne 0 ]; then
+  echo "Erro ao criar o projeto. Verifique se o nome do projeto é válido."
+  exit 1
+fi
+
+# Move o projeto para o diretório desejado
+mv "$nome_do_projeto" "$pasta_projetos"
+
+# Navega para o diretório do projeto recém-criado
+cd "$caminho_projeto" || exit
+
+# Instala as dependências do projeto
+npm install @types/react @types/react-dom eslint prettier eslint-config-prettier \
+  eslint-plugin-react eslint-plugin-react-hooks @typescript-eslint/parser @typescript-eslint/eslint-plugin \
+  react-router-dom @types/react-router-dom
+
+# Configuração de ESLint
+cat > .eslintrc.json <<EOL
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "rules": {
+    "react/react-in-jsx-scope": "off"
+  }
+}
+EOL
+
+# Configura tsconfig.json para suportar JSX
+cat > tsconfig.json <<EOL
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "useDefineForClassFields": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["src"]
+}
+EOL
+
+# Cria a estrutura inicial de pastas e arquivos
+mkdir -p src/components
+mkdir -p src/pages
+mkdir -p src/routes
+
+# Cria o arquivo App.tsx com a estrutura de rotas
+cat > src/App.tsx <<EOL
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Home from "./pages/Home";
+import About from "./pages/About";
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+EOL
+
+# Cria os arquivos Home.tsx e About.tsx
+cat > src/pages/Home.tsx <<EOL
+import React from "react";
+
+function Home() {
+  return <h2>Home</h2>;
+}
+
+export default Home;
+EOL
+
+cat > src/pages/About.tsx <<EOL
+import React from "react";
+
+function About() {
+  return <h2>About</h2>;
+}
+
+export default About;
+EOL
+
+# Abre o projeto no Visual Studio Code
+code "$caminho_projeto"
