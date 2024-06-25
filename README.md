@@ -10,4 +10,27 @@ Para usar este script, siga os passos abaixo:
 2. Dê permissão de execução ao script:
 
    ```bash
-   chmod +x cria-projeto.sh
+    chmod +x cria-projeto.sh
+   
+## Estrutura de pastas
+
+```plaintext
+
+nome-do-projeto/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   │   ├── Home.tsx
+│   │   ├── About.tsx
+│   ├── routes/
+│   ├── App.tsx
+├── .eslintrc.json
+├── tsconfig.json
+├── package.json
+├── public/
+└── index.html
+
+```
+
+
+
